@@ -23,7 +23,7 @@ const registerUser = asyncHandler( async (req,res) => {
     }
 
     //check if user already exists : check using username and email
-    const existedUser=User.findOne({
+    const existedUser=await User.findOne({
         $or: [{username} , {email}]
     })
 
@@ -32,8 +32,8 @@ const registerUser = asyncHandler( async (req,res) => {
     }
 
     //check for images, check for avatar  
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path;
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
     
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar file is required");
@@ -61,6 +61,7 @@ const registerUser = asyncHandler( async (req,res) => {
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
+    
     
     //check for user creation
     if(!createdUser){

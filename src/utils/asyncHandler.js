@@ -9,8 +9,6 @@ export {asyncHandler}
 
 
 
-
-
 // const asyncHandler = () => {}
 //const asyncHandler = (func) => {() => {}}
 //const asyncHandler = (func) => async () => {} this is how below line formed.
