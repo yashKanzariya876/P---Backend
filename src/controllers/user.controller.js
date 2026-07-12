@@ -4,7 +4,7 @@ import {User} from "../models/user.model.js"
 import uploadOnCloudinary from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js"
 import jwt from "jsonwebtoken"
-import { use } from "react"
+
 
 const generateAccessAndRefreshTokens = async(userId)=>{
     try {
@@ -196,22 +196,23 @@ const refreshAccessToken = asyncHandler(async (req,res) =>{
      const {accessToken, refreshToken: newRefreshToken} = await generateAccessAndRefreshTokens(user._id)
  
      return res
-     .send(200)
+     .status(200)
      .cookie("accessToken", accessToken, options)
      .cookie("refreshToken", newRefreshToken, options)
      .json(
-         new ApiResponse(
+        new ApiResponse(
              200,
              {accessToken, newRefreshToken},
              "Access token refreshed"
-         )
-     )
+        )
+    )
    } catch (error) {
         throw new ApiError(401, error?.message || "Invalid refresh token")
    }
 })
 
 const changeCurrentPassword = asyncHandler(async (req,res) =>{
+    console.log(req.body);
     const {oldPassword, newPassword} = req.body
 
     const user = await User.findById(req.user?._id)
@@ -439,6 +440,7 @@ const getUserWatchHistory = asyncHandler(async(req,res) =>{
         new ApiResponse(200, user[0].watchHistory, "Watch History fetched successfully")
     )
 })
+
 
 
 export {
