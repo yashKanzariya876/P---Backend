@@ -249,9 +249,56 @@ const getVideoById = asyncHandler(async (req, res) => {
 })
 
 const updateVideo = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
     //TODO: update video details like title, description, thumbnail
+    const { videoId } = req.params
+    const thumbnailLocalPath = req.file?.path;
+    const {title, description} = req.body
 
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "VideoId is not valid")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if(!video){
+        throw new ApiError(404, "Video not found")
+    }
+
+    if(!video.owner.equals(req.user._id)){
+        throw new ApiError(403, "You are not authorized to update details")
+    }
+
+    if(!title?.trim() || !description?.trim()){
+        throw  new ApiError(400, "title and description required")
+    }
+
+    if(!thumbnailLocalPath){
+        throw new ApiError(400, "File path is not found")
+    }
+    
+    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath)
+
+    if(!thumbnail){
+        throw new ApiError(500, "File is not uploaded to cloudinary")
+    }
+
+    const updatedVideo = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set: {
+                thumbnail: thumbnail.url,
+                title: title.trim(),
+                description: description.trim()
+            }
+        },
+        {new: true, runValidators: true}
+    )
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, updatedVideo, "Details updated successfully")
+    )
 })
 
 const deleteVideo = asyncHandler(async (req, res) => {
@@ -260,7 +307,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
-    const { videoId } = req.params
+    
 })
 
 export {
