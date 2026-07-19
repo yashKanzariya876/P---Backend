@@ -304,10 +304,60 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "VideoId is not valid")
+    }
+    const video = await Video.findById(videoId)
+    if(!video){
+        throw new ApiError(404, "Video not exist")
+    }
+
+    if(!video.owner.equals(req.user._id)){
+        throw new ApiError(403, "User not authorized to delete video")
+    }
+
+    await video.deleteOne()
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, {}, "Video Deleted Successfully")
+    )
 })
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
-    
+    const {videoId} = req.params
+    if(!isValidObjectId(videoId)){
+        throw new ApiError(400, "VideoId is not valid")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if(!video){
+        throw new ApiError(404, "Video not exist")
+    }
+    if(!video.owner.equals(req.user._id)){
+        throw new ApiError(403, "User is not authorized to togglePublish status")
+    }
+
+    // const status = video.isPublished
+
+    const toggle = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $set: {
+                // isPublished: !status
+                isPublished: !video.isPublished
+            }
+        },
+        {new : true}
+    )
+
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200, toggle, "Publish status is toggled successfully")
+    )
 })
 
 export {
