@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import {mongoose, Schema} from "mongoose"
 
 const playlistSchema = new Schema(
     {
@@ -18,7 +18,7 @@ const playlistSchema = new Schema(
         },
         description: {
             type: String,
-            ref: true
+            required: true
         }
     },
     {timestamps: true}
